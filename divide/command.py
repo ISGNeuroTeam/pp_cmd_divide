@@ -37,14 +37,13 @@ class DivideCommand(BaseCommand):
         if result_column_name != "":
             df[result_column_name] = df[first_column] / df[second_column]
             self.logger.debug(f"New column name: {result_column_name}")
-            self.log_progress("Division is completed.", stage=1, total_stages=2)
-            return df
+
         else:
-            new_df = pd.DataFrame(
+            df = pd.DataFrame(
                 {
                     f"add_{first_column}_{second_column}": df[first_column].values
                     / df[second_column].values
                 }
             )
-            self.log_progress("Division is completed.", stage=1, total_stages=2)
-            return new_df
+        self.log_progress("Division is completed.", stage=1, total_stages=1)
+        return df
