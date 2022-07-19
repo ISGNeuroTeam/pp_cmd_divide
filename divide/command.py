@@ -7,9 +7,9 @@ class DivideCommand(BaseCommand):
     """
     Makes division of two columns of dataframe
     a, b - columns must be divided
-    | add a b - creates a new df
+    | divide a b - creates a new df
 
-    | add a b as c - creates new column "c" in the old df
+    | divide a b as c - creates new column "c" in the old df
     """
 
     syntax = Syntax(
@@ -40,11 +40,11 @@ class DivideCommand(BaseCommand):
             self.log_progress("Division is completed.", stage=1, total_stages=2)
             return df
         else:
-            addition_df = pd.DataFrame(
+            new_df = pd.DataFrame(
                 {
                     f"add_{first_column}_{second_column}": df[first_column].values
                     / df[second_column].values
                 }
             )
             self.log_progress("Division is completed.", stage=1, total_stages=2)
-            return addition_df
+            return new_df
