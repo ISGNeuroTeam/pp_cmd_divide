@@ -1,3 +1,4 @@
+import numpy as np
 import pandas as pd
 from otlang.sdk.syntax import Keyword, Positional, OTLType
 from pp_exec_env.base_command import BaseCommand, Syntax
@@ -14,8 +15,8 @@ class DivideCommand(BaseCommand):
 
     syntax = Syntax(
         [
-            Positional("first_column", required=True, otl_type=OTLType.TEXT),
-            Positional("second_column", required=True, otl_type=OTLType.TEXT),
+            Positional("dividend", required=True, otl_type=OTLType.ALL),
+            Positional("divisor", required=True, otl_type=OTLType.ALL),
         ],
     )
     use_timewindow = False  # Does not require time window arguments
@@ -24,25 +25,40 @@ class DivideCommand(BaseCommand):
     def transform(self, df: pd.DataFrame) -> pd.DataFrame:
         self.log_progress("Start divide command")
         # that is how you get arguments
-        first_column = self.get_arg("first_column").value
-        second_column_argument = self.get_arg("second_column")
-        second_column = second_column_argument.value
-        result_column_name = second_column_argument.named_as
+        dividend_argument = self.get_arg("dividend")
+        if isinstance(dividend_argument.value, str):
+            dividend = df[dividend_argument.value]
+        else:
+            dividend = dividend_argument.value
 
-        self.logger.debug(f"Command add get first positional argument = {first_column}")
+        divisor_argument = self.get_arg("divisor")
+        if isinstance(divisor_argument.value, str):
+            divisor = df[divisor_argument.value]
+        else:
+            divisor = divisor_argument.value
+        result_column_name = divisor_argument.named_as
+
+        if isinstance(dividend, (int, float)) and isinstance(divisor, (int, float)):
+            if result_column_name != "":
+                dividend = np.array([dividend] * df.shape[0])
+                divisor = np.array([divisor] * df.shape[0])
+            else:
+                dividend = np.array([dividend])
+                divisor = np.array([divisor])
+
+        self.logger.debug(f"Command add get dividend = {dividend}")
         self.logger.debug(
-            f"Command add get second positional argument = {second_column}"
+            f"Command add get divisor = {divisor}"
         )
 
         if result_column_name != "":
-            df[result_column_name] = df[first_column] / df[second_column]
+            df[result_column_name] = dividend / divisor
             self.logger.debug(f"New column name: {result_column_name}")
 
         else:
             df = pd.DataFrame(
                 {
-                    f"add_{first_column}_{second_column}": df[first_column].values
-                    / df[second_column].values
+                    f"divide_{divisor_argument.value}_{dividend_argument.value}": dividend / divisor
                 }
             )
         self.log_progress("Division is completed.", stage=1, total_stages=1)
