@@ -39,7 +39,7 @@ class DivideCommand(BaseCommand):
         result_column_name = divisor_argument.named_as
 
         if isinstance(dividend, (int, float)) and isinstance(divisor, (int, float)):
-            if result_column_name != "":
+            if result_column_name != "" and not df.empty:
                 dividend = np.array([dividend] * df.shape[0])
                 divisor = np.array([divisor] * df.shape[0])
             else:
